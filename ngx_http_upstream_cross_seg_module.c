@@ -248,6 +248,7 @@ ngx_http_upstream_init_cross_seg_peer(ngx_http_request_t* r,
     }
     r->upstream->peer.get = ngx_http_upstream_get_cross_seg_peer;
     conf = ngx_http_conf_upstream_srv_conf(us, ngx_http_upstream_cross_seg_module);
+    csp->conf = conf;
     // TODO modify peer.tries
     // r->upstream->peer.tries = max_tries;
     return NGX_OK;
@@ -293,8 +294,8 @@ ngx_http_upstream_get_cross_seg_peer(ngx_peer_connection_t* pc, void* data)
     ngx_int_t                                rc;
     ngx_str_t*                               name;
     ngx_uint_t                               ip, mask;
-    ngx_http_upstream_cross_seg_peer_data_t* scp = data;
-    ngx_http_upstream_cross_seg_dict_t*      seg_dict = &scp->conf->seg_dict;
+    ngx_http_upstream_cross_seg_peer_data_t* csp = data;
+    ngx_http_upstream_cross_seg_dict_t*      seg_dict = &csp->conf->seg_dict;
     ngx_rbtree_t*                            rbtree = &seg_dict->rbtree;
     ngx_rbtree_node_t*                       sentinel = &seg_dict->sentinel;
     ngx_seg_rbtree_node_t*                   node;
@@ -319,7 +320,7 @@ ngx_http_upstream_get_cross_seg_peer(ngx_peer_connection_t* pc, void* data)
         ngx_uint_t* peer_idx_ptr = (ngx_uint_t*)node->ip_array->elts + i;
         n = *peer_idx_ptr / (8 * sizeof(uintptr_t));
         m = (uintptr_t) 1 << *peer_idx_ptr % (8 * sizeof(uintptr_t));
-        scp->rrp.tried[n] |= m;
+        cps->rrp.tried[n] |= m;
     }
     return NGX_OK;
 }
