@@ -38,7 +38,7 @@ typedef struct {
 } ngx_seg_rbtree_node_t;
 
 static void* ngx_http_upstream_cross_seg_create_svr_conf(ngx_conf_t* cf);
-static ngx_int_t ngx_http_upstream_cross_seg_add_ip(ngx_conf_t* cf,
+static ngx_int_t ngx_http_upstream_cross_seg_add_idx(ngx_conf_t* cf,
         ngx_http_upstream_cross_seg_dict_t* seg_dict, ngx_uint_t ip, ngx_uint_t peer_idx);
 static ngx_int_t ngx_http_upstream_init_cross_seg_peer(ngx_http_request_t* r,
         ngx_http_upstream_srv_conf_t* us);
@@ -146,7 +146,7 @@ ngx_seg_rbtree_node_create(ngx_conf_t* cf, ngx_rbtree_key_t segment)
 }
 
 static ngx_int_t
-ngx_http_upstream_cross_seg_add_ip(ngx_conf_t* cf, ngx_http_upstream_cross_seg_dict_t* seg_dict,
+ngx_http_upstream_cross_seg_add_idx(ngx_conf_t* cf, ngx_http_upstream_cross_seg_dict_t* seg_dict,
                                    ngx_uint_t ip, ngx_uint_t peer_idx)
 {
     ngx_uint_t                                mask, *peer_idx_ptr;
@@ -168,7 +168,7 @@ ngx_http_upstream_cross_seg_add_ip(ngx_conf_t* cf, ngx_http_upstream_cross_seg_d
     if (peer_idx_ptr == NULL) {
         return NGX_ERROR;
     }
-    *peer_idx_ptr  = ip;
+    *peer_idx_ptr  = peer_idx;
     return NGX_OK;
 }
 
@@ -212,7 +212,7 @@ ngx_http_upstream_init_cross_seg(ngx_conf_t* cf, ngx_http_upstream_srv_conf_t* u
         for (i = 0; i < peers->number; ++i) {
             // TODO check format, if domain, lookup ip
             ngx_uint_t ip = ngx_http_upstream_cross_seg_parse_ip(&peers->peer[i].name);
-            if (ngx_http_upstream_cross_seg_add_ip(cf, seg_dict, ip, i) != NGX_OK) {
+            if (ngx_http_upstream_cross_seg_add_idx(cf, seg_dict, ip, i) != NGX_OK) {
                 return NGX_ERROR;
             }
         }
